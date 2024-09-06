@@ -1,149 +1,201 @@
-import { View, Text, Image, StatusBar, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import React from 'react';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import { Picker } from '@react-native-picker/picker'; // Simple Picker for dropdown
+import { FontAwesome } from '@expo/vector-icons'; // Icons for authentication
 import { useNavigation } from '@react-navigation/native';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated'; // Reanimated for animation
 
 const SignupScreen = () => {
+    const [selectedRole, setSelectedRole] = useState(''); // Dropdown state
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isFormValid, setIsFormValid] = useState(false);
     const navigation = useNavigation();
+
+    // Simple validation function
+    //more conditions will be added when done with database
+    const validateForm = () => {
+        if (username && email.includes('@') && password.length >= 6 && selectedRole) {
+            setIsFormValid(true);
+        } else {
+            setIsFormValid(false);
+        }
+    };
+
+    const handleSignup = () => {
+        if (isFormValid) {
+            Alert.alert('Success', 'Account created successfully!');
+        } else {
+            Alert.alert('Error', 'Please fill in all fields correctly.');
+        }
+    };
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="light-content" />
-            <Image style={styles.backgroundImage} source={require('../assets/images/background.png')} resizeMode="cover" />
+            <Animated.Text style={styles.title} entering={FadeInUp.duration(1000)}>
+                Sign Up
+            </Animated.Text>
 
-            {/* lights */}
-            <View style={styles.lightsContainer}>
-                <Animated.Image
-                    entering={FadeInUp.delay(200).duration(1000).springify()}
-                    style={styles.light1}
-                    source={require('../assets/images/light.png')}
+            <Animated.View entering={FadeInDown.duration(1000).delay(200)} style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Username"
+                    placeholderTextColor="gray"
+                    value={username}
+                    onChangeText={(text) => {
+                        setUsername(text);
+                        validateForm();
+                    }}
                 />
-                <Animated.Image
-                    entering={FadeInUp.delay(400).duration(1000).springify()}
-                    style={styles.light2}
-                    source={require('../assets/images/light.png')}
+            </Animated.View>
+
+            <Animated.View entering={FadeInDown.duration(1000).delay(400)} style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Email"
+                    placeholderTextColor="gray"
+                    value={email}
+                    onChangeText={(text) => {
+                        setEmail(text);
+                        validateForm();
+                    }}
+                    keyboardType="email-address"
                 />
-            </View>
+            </Animated.View>
 
-            {/* title and form */}
-            <View style={styles.titleAndFormContainer}>
-                {/* title */}
-                <View style={styles.titleContainer}>
-                    <Animated.Text entering={FadeInUp.duration(1000).springify()} style={styles.titleText}>
-                        Sign Up
-                    </Animated.Text>
-                </View>
-            </View>
+            <Animated.View entering={FadeInDown.duration(1000).delay(600)} style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Password"
+                    placeholderTextColor="gray"
+                    value={password}
+                    onChangeText={(text) => {
+                        setPassword(text);
+                        validateForm();
+                    }}
+                    secureTextEntry
+                />
+            </Animated.View>
 
-            {/* form */}
-            <View style={styles.formContainer}>
-            <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
-                    <TextInput placeholder='Username' placeholderTextColor='gray' />
-                </Animated.View>
+            <Animated.View entering={FadeInDown.duration(1000).delay(800)} style={styles.pickerContainer}>
+                <Picker
+                    selectedValue={selectedRole}
+                    onValueChange={(itemValue) => {
+                        setSelectedRole(itemValue);
+                        validateForm();
+                    }}
+                    style={styles.picker}
+                >
+                    <Picker.Item label="Select Role" value="" />
+                    <Picker.Item label="Employer" value="employer" />
+                    <Picker.Item label="Employee" value="employee" />
+                </Picker>
+            </Animated.View>
 
-                <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
-                    <TextInput placeholder='Email' placeholderTextColor='gray' />
-                </Animated.View>
+            <Animated.View entering={FadeInDown.duration(1000).delay(1000)} style={styles.buttonContainer}>
+                <TouchableOpacity
+                    style={[styles.signupButton, isFormValid ? styles.signupButtonActive : styles.signupButtonDisabled]}
+                    onPress={handleSignup}
+                    disabled={!isFormValid}
+                >
+                    <Text style={styles.buttonText}>Sign Up</Text>
+                </TouchableOpacity>
+            </Animated.View>
 
-                <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={[styles.inputContainer, styles.passwordContainer]}>
-                    <TextInput placeholder='Password' placeholderTextColor='gray' secureTextEntry />
-                </Animated.View>
+            <Animated.View entering={FadeInDown.duration(1000).delay(1200)} style={styles.iconContainer}>
+                <TouchableOpacity style={styles.iconButton}>
+                    <FontAwesome name="google" size={32} color="#DB4437" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconButton}>
+                    <FontAwesome name="facebook" size={32} color="#4267B2" />
+                </TouchableOpacity>
+            </Animated.View>
 
-                <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.loginButton}>
-                        <Text style={styles.buttonText}>Sign Up</Text>
-                    </TouchableOpacity>
-                </Animated.View>
-
-                <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.forgotPasswordContainer}>
-                    <Text style={styles.forgotPasswordText}>Already have an account?</Text>
-                    <TouchableOpacity onPress={() => navigation.push('Login')}>
-                        <Text style={styles.signUpText}>Login</Text>
-                    </TouchableOpacity>
-                </Animated.View>
-            </View>
+            <Animated.View entering={FadeInDown.duration(1000).delay(1400)} style={styles.forgotPasswordContainer}>
+                <Text style={styles.forgotPasswordText}>Already have an account?</Text>
+                <TouchableOpacity onPress={() => navigation.push('Login')}>
+                    <Text style={styles.loginText}>Login</Text>
+                </TouchableOpacity>
+            </Animated.View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
+        padding: 20,
         backgroundColor: 'white',
-        flex: 1,
-        width: '100%',
+        justifyContent: 'center',
     },
-    backgroundImage: {
-        height: '100%',
-        width: '100%',
-        position: 'absolute',
-    },
-    lightsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        width: '100%',
-        position: 'absolute',
-    },
-    light1: {
-        height: 225,
-        width: 90,
-    },
-    light2: {
-        height: 160,
-        width: 65,
-    },
-    titleAndFormContainer: {
-        flex: 1,
-        justifyContent: 'space-around',
-        paddingTop: 40,
-        paddingBottom: 10,
-    },
-    titleContainer: {
-        alignItems: 'center',
-    },
-    titleText: {
-        color: 'white',
+    title: {
+        fontSize: 36,
         fontWeight: 'bold',
-        letterSpacing: 1,
-        fontSize: 40,
-    },
-    formContainer: {
-        alignItems: 'center',
-        marginHorizontal: 16,
+        color: '#1E90FF',
+        textAlign: 'center',
+        marginBottom: 30,
     },
     inputContainer: {
-        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-        padding: 15,
-        borderRadius: 20,
-        width: '100%',
+        marginBottom: 15,
     },
-    passwordContainer: {
-        marginBottom: 12,
+    input: {
+        backgroundColor: '#F0F8FF',
+        padding: 15,
+        borderRadius: 10,
+        width: '100%',
+        fontSize: 16,
+        borderWidth: 1,
+        borderColor: '#87CEEB',
+    },
+    pickerContainer: {
+        backgroundColor: '#F0F8FF',
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#87CEEB',
+        marginBottom: 15,
+    },
+    picker: {
+        width: '100%',
+        height: 50,
     },
     buttonContainer: {
-        width: '100%',
+        marginBottom: 15,
     },
-    loginButton: {
-        width: '100%',
+    signupButton: {
+        padding: 15,
+        borderRadius: 10,
+    },
+    signupButtonActive: {
+        backgroundColor: '#1E90FF',
+    },
+    signupButtonDisabled: {
         backgroundColor: '#87CEEB',
-        padding: 12,
-        borderRadius: 20,
-        marginBottom: 12,
     },
     buttonText: {
+        color: 'white',
         fontSize: 18,
         fontWeight: 'bold',
-        color: 'white',
         textAlign: 'center',
     },
+    iconContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginBottom: 20,
+    },
+    iconButton: {
+        marginHorizontal: 10,
+    },
     forgotPasswordContainer: {
-        alignItems: 'center',
-        marginTop: 20,
+        flexDirection: 'row',
+        justifyContent: 'center',
     },
     forgotPasswordText: {
         color: 'gray',
     },
-    signUpText: {
-        color: '#00bcd4',
+    loginText: {
+        color: '#1E90FF',
+        marginLeft: 5,
     },
 });
 
